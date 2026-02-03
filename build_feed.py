@@ -9,10 +9,11 @@ from bs4 import BeautifulSoup
 OUTPUT = "feed.xml"
 
 SOURCES = [
+    SOURCES = [
     ("Wecandoo Toulouse", "https://wecandoo.fr/ateliers/toulouse"),
-    ("Eventbrite Toulouse Workshops", "https://www.eventbrite.co.uk/d/france--toulouse/workshops/"),
     ("Quai des Savoirs Agenda", "https://quaidessavoirs.toulouse-metropole.fr/agenda/"),
 ]
+
 
 MAX_ITEMS_PER_SOURCE = 15
 
@@ -75,10 +76,16 @@ def make_guid(title: str, link: str) -> str:
 def main():
     all_items = []
     for source_name, url in SOURCES:
+    try:
         page = fetch(url)
-        items = guess_items(url, page)
-        for title, link in items:
-            all_items.append((source_name, title, link))
+    except Exception as e:
+        print(f"Skipping {source_name}. Reason: {e}")
+        continue
+
+    items = guess_items(url, page)
+    for title, link in items:
+        all_items.append((source_name, title, link))
+
 
     seen_links = set()
     deduped = []
