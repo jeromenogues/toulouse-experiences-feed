@@ -9,13 +9,34 @@ from bs4 import BeautifulSoup
 OUTPUT = "feed.xml"
 
 SOURCES = [
-    SOURCES = [
-    ("Wecandoo Toulouse", "https://wecandoo.fr/ateliers/toulouse"),
+    # Hands-on workshops and making things
     ("Quai des Savoirs Agenda", "https://quaidessavoirs.toulouse-metropole.fr/agenda/"),
+
+    # Wecandoo categories
+    ("Wecandoo Toulouse (all)", "https://wecandoo.fr/ateliers/toulouse"),
+    ("Wecandoo Toulouse: Cuisine", "https://wecandoo.fr/ateliers/toulouse/le-gourmand"),
+    ("Wecandoo Toulouse: Poterie & Céramique", "https://wecandoo.fr/ateliers/toulouse/la-poterie-et-ceramique"),
+
+    # Cooking schools in Toulouse
+    ("Atelier des Chefs Toulouse", "https://www.atelierdeschefs.fr/ateliers/46/toulouse-francois-verdier/"),
+    ("L'atelier Gourmand Toulouse", "https://www.atelier-gourmand.fr/nos-ateliers/cours-cuisine-toulouse"),
+
+    # Optional sources. Keep, but do not crash if blocked
+    ("Meetup: Expats in Toulouse (often language events)", "https://www.meetup.com/toulouseexpatmeetup/"),
 ]
 
 
+
 MAX_ITEMS_PER_SOURCE = 15
+KEYWORDS = [
+    "atelier", "workshop", "cours", "initiation", "stage", "masterclass",
+    "cuisine", "pâtisserie", "patiss", "boulanger", "pain",
+    "poterie", "céramique", "ceramique", "modelage",
+    "bois", "menuiserie", "ébénisterie", "ebenisterie",
+    "vin", "dégustation", "degustation", "oenologie", "œnologie",
+    "photo", "photographie",
+    "language", "langue", "exchange", "café", "cafe"
+]
 
 def fetch(url: str) -> str:
     headers = {"User-Agent": "Mozilla/5.0 (toulouse-rss-bot/1.0)"}
@@ -35,8 +56,16 @@ def guess_items(base_url: str, html_text: str):
 
     candidates = []
     for a in links:
-        href = (a.get("href") or "").strip()
-        text = a.get_text(" ", strip=True)
+    href = (a.get("href") or "").strip()
+    text = a.get_text(" ", strip=True)
+
+    if not href or not text:
+        continue
+
+    text_lower = text.lower()
+    if not any(k in text_lower for k in KEYWORDS):
+        continue
+
 
         if not href or not text:
             continue
